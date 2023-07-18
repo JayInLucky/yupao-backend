@@ -1,0 +1,9 @@
+
+{
+java:S1488"`Immediately return this expression instead of assigning it to the temporary variable "redisson".(¥½ÁÌþÿÿÿÿ
+_
+java:S1128"DRemove this unused import 'org.redisson.api.RedissonReactiveClient'.(ÄþŸÈøÿÿÿÿ
+T
+java:S1128">Remove this unused import 'org.redisson.api.RedissonRxClient'.(´Ü»Ï
+`
+java:S1128"ERemove this unused import 'org.springframework.stereotype.Component'.(Þ÷Ñ¸ÿÿÿÿÿ

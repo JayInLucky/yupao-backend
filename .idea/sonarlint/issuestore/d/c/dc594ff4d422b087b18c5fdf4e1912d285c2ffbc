@@ -1,0 +1,12 @@
+
+\
+java:S1075"ARefactor your code to get this URI from a customizable parameter.(Éï®üÿÿÿÿ
+b
+java:S3252"GUse static access with "com.alibaba.excel.EasyExcelFactory" for "read".(ÿ³õıÿÿÿÿ
+N	java:S106"9Replace this use of System.out or System.err by a logger.(Ğ¬Ê¯
+N	java:S106"9Replace this use of System.out or System.err by a logger.(’ìº
+S	java:S106!"9Replace this use of System.out or System.err by a logger.(öêŞÈÿÿÿÿÿ
+e
+java:S1128"JRemove this unused import 'org.apache.commons.collections4.map.LinkedMap'.(„ÎÓİÿÿÿÿÿ
+D
+java:S1128	".Remove this unused import 'java.util.Objects'.(¼¸õ›
