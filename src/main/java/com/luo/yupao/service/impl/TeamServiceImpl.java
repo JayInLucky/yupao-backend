@@ -127,6 +127,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
     @Override
     public List<TeamUserVo> listTeams(TeamQuery teamQuery,boolean isAdmin) {
         QueryWrapper<Team> queryWrapper=new QueryWrapper<>();
+
         //组合查询条件
         if (teamQuery!=null){
             //根据id查
@@ -245,11 +246,17 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
     @Override
     public boolean joinTeam(TeamJoinRequest teamJoinRequest,User loginUser) {
         if (teamJoinRequest==null){
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"请求参数为空");
         }
         // 队伍是否存在
         Long teamId=teamJoinRequest.getTeamId();
+        if (teamId==null || teamId <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"队伍不存在");
+        }
         Team team = getTeamById(teamId);
+        if (team==null){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"队伍不存在");
+        }
         //只能加入未过期的队伍
         Date expireTime= team.getExpireTime();
         if (expireTime != null && expireTime.before(new Date())){
@@ -317,8 +324,6 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
         }
     }
 
-
-
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean quitTeam(TeamQuitRequest teamQuitRequest, User loginUser) {
@@ -327,7 +332,13 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         Long teamId= teamQuitRequest.getTeamId();
-       Team team=getTeamById(teamId);
+        if (teamId==null || teamId <= 0){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"请求参数不合法");
+        }
+        Team team=getTeamById(teamId);
+        if (team == null){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"队伍不存在");
+        }
         // 校验我是否已加入队伍
         long userId =loginUser.getId();
         UserTeam queryUserTeam =new UserTeam();
@@ -352,7 +363,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
                 //1. 查询已加入队伍的所有用户和加入时间
                 QueryWrapper<UserTeam> userTeamQueryWrapper=new QueryWrapper<>();
                 userTeamQueryWrapper.eq("teamId",teamId);
-                userTeamQueryWrapper.last("order by id asc limit 2");
+                userTeamQueryWrapper.last("order by id asc limit 2"); //拼接到sql语句的最后
                 List<UserTeam> userTeamList = userTeamService.list(userTeamQueryWrapper);
                 if (CollectionUtils.isEmpty(userTeamList) || userTeamList.size() <= 1){
                     throw new BusinessException(ErrorCode.SYSTEM_ERROR);
@@ -400,7 +411,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
      * @param teamId
      * @return
      */
-    private Team getTeamById(Long teamId) {
+    public Team getTeamById(Long teamId) {
         if (teamId==null || teamId <= 0){
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }

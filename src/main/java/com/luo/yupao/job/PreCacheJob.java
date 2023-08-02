@@ -33,20 +33,23 @@ public class PreCacheJob {
     @Resource
     private RedissonClient redissonClient;
 
-    //重点用户
+    //重点用户 （缓存 用户id为1 的）， 这里不要写死， 动态读取，
     private List<Long> mainUserList= Arrays.asList(1L);
 
-    @Scheduled(cron = "0 4 0 * * *")
+    //每天执行，预热推荐用户
+    @Scheduled(cron = "0 4 0 * * *")   // 每一小时缓存一次
     public void doCacheRecommendUser(){
 
         RLock lock=redissonClient.getLock("yupao:precachejob:docache:lock");
 
         try {
             //只有一个线程能获取到锁   timeout:锁一定要加过期时间
-            if (lock.tryLock(0,30000L,TimeUnit.MILLISECONDS)){
+            // waitTime一定是 0 ：每天只能允许一个人，执行一次 ， 只要第一次没获取到，就放弃。
+            if (lock.tryLock(0,-1,TimeUnit.MILLISECONDS)){
                 System.out.println("getlock:"+Thread.currentThread().getId());
                 for (Long userId : mainUserList){
                     QueryWrapper<User> queryWrapper=new QueryWrapper<>();
+                    // 假设缓存，一页，20条数据
                     Page<User> userPage=userService.page(new Page<>(1,20),queryWrapper);
                     String redisKey = String.format("yupao:user:recommend:%s", userId);
                     ValueOperations<String,Object> valueOperations = redisTemplate.opsForValue();
@@ -58,12 +61,18 @@ public class PreCacheJob {
                         log.error("redis set key error",e);
                     }
                 }
+                // 不要放在try里， 代码中途报错的话，锁无法释放。
+//                if (lock.isHeldByCurrentThread()) {
+//                    System.out.println("unlock:"+Thread.currentThread().getId());
+//                    //用完锁要释放
+//                    lock.unlock();
+//                }
 
             }
         } catch (InterruptedException e) {
             log.error("doCacheRecommendUser error",e);
         }finally {
-            // 判断当前的锁是不是这个线程加的锁
+            // 只能释放自己的锁。 判断当前的锁是不是这个线程加的锁
             if (lock.isHeldByCurrentThread()) {
                 System.out.println("unlock:"+Thread.currentThread().getId());
                 //用完锁要释放

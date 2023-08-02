@@ -16,6 +16,7 @@ public class RedisTemplateConfig {
 
     @Bean
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
+        //指定k-v的数据结构
         RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
 //        指定redis连接工厂
         redisTemplate.setConnectionFactory(connectionFactory);

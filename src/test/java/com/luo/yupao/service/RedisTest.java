@@ -21,7 +21,7 @@ public class RedisTest {
 
     @Test
     void test() {
-        ValueOperations valueOperations = redisTemplate.opsForValue();
+        ValueOperations valueOperations = redisTemplate.opsForValue() ;
         // 增
         valueOperations.set("yupiString", "dog");
         valueOperations.set("yupiInt", 1);

@@ -113,8 +113,8 @@ public class TeamController {
         boolean isAdmin = userService.isAdmin(request);
         //查询队伍列表
         List<TeamUserVo> teamList = teamService.listTeams(teamQuery,isAdmin);
-        final List<Long> teamIdList = teamList.stream().map(TeamUserVo::getId).collect(Collectors.toList());
         //判断当前用户是否已加入队伍
+        final List<Long> teamIdList = teamList.stream().map(TeamUserVo::getId).collect(Collectors.toList());
         QueryWrapper<UserTeam> userTeamQueryWrapper=new QueryWrapper<>();
         try {
             User loginUser= userService.getLoginUser(request);
@@ -138,6 +138,7 @@ public class TeamController {
         return ResultUtils.success(teamList);
     }
 
+    // todo 查询分页
     @GetMapping("/list/page")
     public BaseResponse<Page<Team>> listTeamsByPage(TeamQuery teamQuery){
         if (teamQuery==null){
@@ -172,7 +173,7 @@ public class TeamController {
     }
 
     /**
-     * 获取我创建的队伍
+     * 获取我(当前用户)创建的队伍
      * @param teamQuery
      * @param request
      * @return
@@ -189,7 +190,7 @@ public class TeamController {
     }
 
     /**
-     * 获取我加入的队伍
+     * 获取我（当前用户）加入的队伍
      * @param teamQuery
      * @param request
      * @return
@@ -203,7 +204,7 @@ public class TeamController {
         QueryWrapper<UserTeam> queryWrapper=new QueryWrapper<>();
         queryWrapper.eq("userId",loginUser.getId());
         List<UserTeam> userTeamList=userTeamService.list(queryWrapper);
-        //取出不重复的队伍 id
+        //取出不重复的队伍 id  正常情况下，不应该会有重复的，但是以防万一，严谨一点，防止一些脏数据
         // teamId userId
         //  1   ,   2
         //  1   ,   3
@@ -211,7 +212,6 @@ public class TeamController {
         //   result
         //  1  ==> 2 , 3
         //  2  ==> 3
-
         Map<Long, List<UserTeam>> listMap = userTeamList.stream()
                 .collect(Collectors.groupingBy(UserTeam::getTeamId));
         List<Long> idList=new ArrayList<>(listMap.keySet());

@@ -196,7 +196,7 @@ public class UserController {
     }
 
     /**
-     * 推荐页面
+     * 推荐页面（主页）
      * @param pageSize
      * @param pageNum
      * @param request
@@ -219,6 +219,7 @@ public class UserController {
 
         //写缓存
         try {
+//            过期时间 30s
             valueOperations.set(redisKey,userPage,30000, TimeUnit.MILLISECONDS);
         }catch (Exception e){
             log.error("redis set key error",e);
